@@ -5,6 +5,8 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.geisonfeitosa.apicrudclients.dto.ClientDTO;
 import com.geisonfeitosa.apicrudclients.entities.Client;
 import com.geisonfeitosa.apicrudclients.repository.ClientRepository;
+import com.geisonfeitosa.apicrudclients.services.exceptions.DatabaseException;
 import com.geisonfeitosa.apicrudclients.services.exceptions.ResourceNotFoundException;
 
 @Service
@@ -52,6 +55,16 @@ public class ClientService {
 			return new ClientDTO(entity);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Id not found " + id);
+		}
+	}
+	
+	public void delete(Long id) {
+		try {
+			clientRepository.deleteById(id);			
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id not found " + id);
+		} catch (DataIntegrityViolationException e) {
+			throw new DatabaseException("Integrity violation");
 		}
 	}
 	
